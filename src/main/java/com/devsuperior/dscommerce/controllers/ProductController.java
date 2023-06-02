@@ -1,7 +1,10 @@
 package com.devsuperior.dscommerce.controllers;
 
 import com.devsuperior.dscommerce.dto.ProductDTO;
+import com.devsuperior.dscommerce.dto.ProductMinDTO;
 import com.devsuperior.dscommerce.services.ProductService;
+import com.devsuperior.dscommerce.services.exceptions.DatabaseException;
+import com.devsuperior.dscommerce.services.exceptions.ResourceNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,45 +17,41 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping(value = "/products")
+@RequestMapping("/products")
 public class ProductController {
 
     @Autowired
     private ProductService service;
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
-        ProductDTO dto = service.findById(id);
-        return ResponseEntity.ok(dto);
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_OPERATOR')")
+    @GetMapping("{id}")
+    public ResponseEntity<ProductDTO> findById(@PathVariable("id") Long id) throws ResourceNotFoundException {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> findAll(
-            @RequestParam(name = "name", defaultValue = "") String name,
-            Pageable pageable) {
-        Page<ProductDTO> dto = service.findAll(name, pageable);
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<Page<ProductMinDTO>> findAll(@RequestParam(value = "name", defaultValue = "") String name,
+                                                       Pageable pageable) {
+        return ResponseEntity.ok(service.findAll(name, pageable));
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<ProductDTO> insert(@Valid @RequestBody ProductDTO dto) {
-        dto = service.insert(dto);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("{id}")
                 .buildAndExpand(dto.getId()).toUri();
-        return ResponseEntity.created(uri).body(dto);
+        return ResponseEntity.created(uri).body(service.insert(dto));
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<ProductDTO> update(@PathVariable Long id, @Valid @RequestBody ProductDTO dto) {
-        dto = service.update(id, dto);
-        return ResponseEntity.ok(dto);
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductDTO> update(@PathVariable("id") Long id, @Valid @RequestBody ProductDTO dto) throws ResourceNotFoundException {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> update(@PathVariable("id") Long id) throws DatabaseException, ResourceNotFoundException {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
