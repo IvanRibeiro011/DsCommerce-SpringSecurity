@@ -3,6 +3,7 @@ package com.devsuperior.dscommerce.controllers;
 import com.devsuperior.dscommerce.dto.OrderDTO;
 import com.devsuperior.dscommerce.dto.ProductDTO;
 import com.devsuperior.dscommerce.dto.ProductMinDTO;
+import com.devsuperior.dscommerce.entities.Order;
 import com.devsuperior.dscommerce.services.OrderService;
 import com.devsuperior.dscommerce.services.ProductService;
 import com.devsuperior.dscommerce.services.exceptions.DatabaseException;
@@ -29,5 +30,12 @@ public class OrderController {
     @GetMapping("{id}")
     public ResponseEntity<OrderDTO> findById(@PathVariable("id") Long id) throws ResourceNotFoundException {
         return ResponseEntity.ok(service.findById(id));
+    }
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_OPERATOR')")
+    @PostMapping
+    public ResponseEntity<OrderDTO> insert(@Valid @RequestBody OrderDTO dto) {
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("{id}")
+                .buildAndExpand(dto.getId()).toUri();
+        return ResponseEntity.created(uri).body(service.insert(dto));
     }
 }
