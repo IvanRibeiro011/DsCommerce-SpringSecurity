@@ -19,11 +19,11 @@ public class OrderController {
     @Autowired
     private OrderService service;
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_OPERATOR')")
     @GetMapping("{id}")
     public ResponseEntity<OrderDTO> findById(@PathVariable("id") Long id) throws ResourceNotFoundException {
         return ResponseEntity.ok(service.findById(id));
     }
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_OPERATOR')")
     @PostMapping
     public ResponseEntity<OrderDTO> insert(@Valid @RequestBody OrderDTO dto) {
