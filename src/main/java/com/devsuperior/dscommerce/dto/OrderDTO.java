@@ -2,7 +2,6 @@ package com.devsuperior.dscommerce.dto;
 
 import com.devsuperior.dscommerce.entities.Order;
 import com.devsuperior.dscommerce.entities.OrderItem;
-import com.devsuperior.dscommerce.entities.Payment;
 import com.devsuperior.dscommerce.enums.OrderStatus;
 import jakarta.validation.constraints.NotEmpty;
 
